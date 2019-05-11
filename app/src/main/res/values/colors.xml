@@ -3,4 +3,10 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="primaryText">#de000000</color> <!-- 87% -->
+    <color name="secondaryText">#8a000000</color> <!-- 54% -->
+    <color name="tertiaryText">#61000000</color> <!-- 38% -->
+
+    <color name="pointsText">#FBC02D</color>
 </resources>
