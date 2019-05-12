@@ -8,6 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.snackbar.Snackbar
+import com.vipulasri.streamer.R
+import com.vipulasri.streamer.StreamerApplication
+import java.io.IOException
+import java.io.StringReader
+import java.util.concurrent.TimeoutException
 
 fun dpToPx(dp: Float, context: Context): Int {
     return dpToPx(dp, context.resources)
@@ -62,4 +67,12 @@ fun View.setVisible() {
 
 fun View.setInvisible() {
     visibility = View.INVISIBLE
+}
+
+fun fetchErrorMessage(throwable: Throwable): String {
+    return when (throwable) {
+        is IOException -> getString(StreamerApplication.instance, R.string.error_msg_no_internet)
+        is TimeoutException -> getString(StreamerApplication.instance, R.string.error_msg_timeout)
+        else -> if(throwable.message != null) throwable.message!! else getString(StreamerApplication.instance, R.string.error_msg_unknown)
+    }
 }
