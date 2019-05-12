@@ -1,4 +1,4 @@
-package com.vipulasri.streamer.ui
+package com.vipulasri.streamer.ui.home
 
 import android.os.Bundle
 import android.util.Log
@@ -8,11 +8,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.vipulasri.streamer.R
 import com.vipulasri.streamer.inject.ViewModelFactory
+import com.vipulasri.streamer.model.Post
+import com.vipulasri.streamer.ui.PostsViewModel
 import com.vipulasri.streamer.ui.base.BaseActivity
+import com.vipulasri.streamer.ui.details.PostDetailsActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
-class MainActivity : BaseActivity() {
+class MainActivity : BaseActivity(), PostsAdapter.Callbacks {
 
     @Inject
     lateinit var mViewModelFactory: ViewModelFactory
@@ -28,6 +31,7 @@ class MainActivity : BaseActivity() {
         setupObservers()
 
         mAdapter = PostsAdapter(arrayListOf())
+        mAdapter.setCallbacks(this)
 
         recyclerView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         recyclerView.adapter = mAdapter
@@ -41,7 +45,7 @@ class MainActivity : BaseActivity() {
                 showLoading(isLoading)
 
                 response?.let {
-                    //Log.d("posts", "->$it")
+                    Log.d("posts", "->$it")
                     mAdapter.setData(it)
                 }
 
@@ -54,5 +58,9 @@ class MainActivity : BaseActivity() {
 
     private fun showLoading(active: Boolean) {
 
+    }
+
+    override fun onPostClick(post: Post) {
+        PostDetailsActivity.launchActivity(this, postId = post.getId())
     }
 }

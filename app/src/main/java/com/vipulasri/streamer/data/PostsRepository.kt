@@ -3,6 +3,7 @@ package com.vipulasri.streamer.data
 import androidx.collection.arrayMapOf
 import com.vipulasri.streamer.data.remote.ApiService
 import com.vipulasri.streamer.model.Post
+import com.vipulasri.streamer.model.PostDetails
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -21,6 +22,12 @@ constructor(private val mApiService: ApiService) {
 
         return mApiService.posts(map)
             .map { it.posts }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun loadPost(postId: String): Observable<PostDetails> {
+        return mApiService.post(postId, arrayMapOf())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
     }

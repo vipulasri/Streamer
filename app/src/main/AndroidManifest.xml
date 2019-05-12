@@ -14,7 +14,7 @@
             android:theme="@style/AppTheme" tools:ignore="GoogleAppIndexingWarning">
 
         <activity
-                android:name=".ui.MainActivity"
+                android:name=".ui.home.MainActivity"
                 android:label="@string/app_name"
                 android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -23,6 +23,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <activity
+                android:name=".ui.details.PostDetailsActivity"
+                android:label="@string/app_name"
+                android:theme="@style/AppTheme.NoActionBar"/>
 
     </application>
 

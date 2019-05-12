@@ -1,4 +1,4 @@
-package com.vipulasri.streamer.ui
+package com.vipulasri.streamer.ui.home
 
 import androidx.recyclerview.widget.RecyclerView
 import android.view.View
@@ -12,13 +12,19 @@ import kotlinx.android.synthetic.main.item_post.view.*
 class PostsAdapter(var mFeedList: MutableList<Post>) : RecyclerView.Adapter<PostsAdapter.CategoryItemViewHolder>() {
 
     interface Callbacks {
-
+        fun onPostClick(post: Post)
     }
 
     private var callbacks: Callbacks? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryItemViewHolder {
-        return CategoryItemViewHolder(inflateView(R.layout.item_post, parent, false))
+        return CategoryItemViewHolder(
+            inflateView(
+                R.layout.item_post,
+                parent,
+                false
+            )
+        )
     }
 
     override fun onBindViewHolder(holder: CategoryItemViewHolder, position: Int) {
@@ -26,6 +32,8 @@ class PostsAdapter(var mFeedList: MutableList<Post>) : RecyclerView.Adapter<Post
             imageUrl.let { holder.image.loadImageUrl(it) }
             holder.name.text = name
             holder.points.text = info
+
+            holder.itemView.setOnClickListener { callbacks?.onPostClick(this) }
         }
     }
 

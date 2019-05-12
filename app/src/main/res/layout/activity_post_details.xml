@@ -5,7 +5,16 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.MainActivity">
+        tools:context=".ui.home.MainActivity">
+
+    <com.google.android.exoplayer2.ui.PlayerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/playerView"
+            android:animateLayoutChanges="true"
+            app:keep_content_on_player_reset="true"
+            app:show_buffering="always"
+            app:shutter_background_color="@android:color/black"/>
 
     <com.google.android.material.appbar.AppBarLayout
             android:layout_height="wrap_content"
