@@ -5,22 +5,24 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/black"
         tools:context=".ui.home.MainActivity">
 
-    <com.google.android.exoplayer2.ui.PlayerView
+    <com.google.android.exoplayer2.ui.SimpleExoPlayerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/playerView"
             android:animateLayoutChanges="true"
             app:keep_content_on_player_reset="true"
             app:show_buffering="always"
-            app:shutter_background_color="@android:color/black"/>
+            app:controller_layout_id="@layout/layout_exo_player_controls"/>
 
     <com.google.android.material.appbar.AppBarLayout
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:background="@android:color/transparent"
-            android:theme="@style/AppTheme.AppBarOverlay">
+            android:theme="@style/AppTheme.AppBarOverlay"
+            app:elevation="0dp">
 
         <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -30,6 +32,12 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/progress"
+            android:layout_gravity="center"/>
 
+    <include layout="@layout/layout_error_light"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -26,9 +26,10 @@ class Post {
 
 class PostDetails {
     @Selector(value = "video > source", attr = "src") lateinit var videoUrl: String
+    @Selector(value = "img.card-img-top", attr = "src") lateinit var thumbUrl: String
 
     override fun toString(): String {
-        return "PostDetails(videoUrl='$videoUrl')"
+        return "PostDetails(videoUrl='$videoUrl', thumbUrl='$thumbUrl')"
     }
 
 }

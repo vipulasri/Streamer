@@ -2,6 +2,7 @@ package com.vipulasri.streamer.ui.details
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.Observer
@@ -11,17 +12,24 @@ import com.vipulasri.streamer.inject.ViewModelFactory
 import com.vipulasri.streamer.ui.PostsViewModel
 import com.vipulasri.streamer.ui.base.BaseActivity
 import javax.inject.Inject
-import com.google.android.exoplayer2.ExoPlayerFactory
-import com.google.android.exoplayer2.DefaultRenderersFactory
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import kotlinx.android.synthetic.main.activity_post_details.*
 import com.google.android.exoplayer2.source.MediaSource
 import android.net.Uri
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
-import com.google.android.exoplayer2.source.ExtractorMediaSource
 import android.view.View
-import com.google.android.exoplayer2.SimpleExoPlayer
 import android.os.Build
+import android.widget.Toast
+import androidx.core.content.ContextCompat
+import com.google.android.exoplayer2.*
+import com.google.android.exoplayer2.source.ExtractorMediaSource
+import com.vipulasri.streamer.extensions.fetchErrorMessage
+import com.vipulasri.streamer.extensions.setGone
+import com.vipulasri.streamer.extensions.setVisible
+import com.vipulasri.streamer.extensions.whenNotNull
+import com.vipulasri.streamer.utils.StatusBarUtil
+import kotlinx.android.synthetic.main.layout_error_light.*
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.vipulasri.streamer.model.PostDetails
 
 
 class PostDetailsActivity : BaseActivity() {
@@ -42,14 +50,24 @@ class PostDetailsActivity : BaseActivity() {
 
     private lateinit var mViewModel: PostsViewModel
     private lateinit var mPostId: String
+    private var mPost: PostDetails? = null
     private var mPlayer: SimpleExoPlayer? = null
+    private var mPlaybackPosition = 0L
+    private var mCurrentWindow = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_post_details)
-        setActivityTitle("")
 
+        setActivityTitle("")
         isDisplayHomeAsUpEnabled = true
+
+        whenNotNull(toolbar){
+            it.setNavigationIcon(R.drawable.ic_close_black_24dp)
+            it.navigationIcon!!.setColorFilter(ContextCompat.getColor(this, R.color.white), PorterDuff.Mode.SRC_IN)
+        }
+
+        StatusBarUtil.setColor(this, ContextCompat.getColor(this, R.color.black))
 
         mPostId = intent.getStringExtra(EXTRA_POST_ID)
 
@@ -66,31 +84,67 @@ class PostDetailsActivity : BaseActivity() {
 
                 response?.let {
                     Log.d("post", "->$it")
-                    initPlayer(it.videoUrl)
+                    mPost = it
+                    initPlayer()
                 }
 
                 error?.let {
-                    Log.e("error", "->${it.message}")
+                    //Log.e("error", "->${it.message}")
+                    showError(fetchErrorMessage(it))
                 }
             }
         })
     }
 
     private fun showLoading(active: Boolean) {
-
+        if(active) {
+            progress.setVisible()
+            showContent(false)
+            view_error.setGone()
+        } else {
+            progress.setGone()
+            showContent(true)
+            view_error.setGone()
+        }
     }
 
-    private fun initPlayer(url: String) {
-        mPlayer = ExoPlayerFactory.newSimpleInstance(this, DefaultRenderersFactory(this), DefaultTrackSelector())
-        playerView.player = mPlayer
+    private fun showError(message: String) {
+        showContent(false)
+        view_error.setVisible()
+        text_error_message.text = message
+        button_error_retry.setOnClickListener { mViewModel.loadPost(mPostId) }
+    }
 
-        mPlayer!!.prepare(buildMediaSource(Uri.parse(url)), true, false)
+    private fun showContent(active: Boolean){
+        if(active) {
+            playerView.setVisible()
+        } else {
+            playerView.setGone()
+        }
+    }
+
+    private fun initPlayer() {
+        mPlayer = ExoPlayerFactory.newSimpleInstance(this, DefaultRenderersFactory(this), DefaultTrackSelector()).apply {
+            seekTo(mCurrentWindow, mPlaybackPosition)
+            playWhenReady = true
+            prepare(buildMediaSource(Uri.parse(mPost!!.videoUrl)), true, false)
+            addListener(object: Player.DefaultEventListener(){
+                override fun onPlayerError(error: ExoPlaybackException?) {
+                    super.onPlayerError(error)
+                    val message = if(error != null) error.message else getString(R.string.error_msg_unknown)
+                    Toast.makeText(this@PostDetailsActivity, message, Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+
+            })
+        }
+
+        playerView.player = mPlayer
     }
 
     private fun buildMediaSource(uri: Uri): MediaSource {
-        return ExtractorMediaSource.Factory(
-            DefaultHttpDataSourceFactory("streamer")
-        ).createMediaSource(uri)
+        val dataSourceFactory = DefaultDataSourceFactory(this, "streamer")
+        return ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri)
     }
 
     private fun hideSystemUi() {
@@ -117,7 +171,9 @@ class PostDetailsActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        //hideSystemUi()
+        if ((Build.VERSION.SDK_INT <= 23 || mPlayer == null) && mPost != null) {
+            initPlayer()
+        }
     }
 
     public override fun onStop() {
